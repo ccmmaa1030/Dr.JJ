@@ -2,10 +2,11 @@
 {% load django_bootstrap5 %}
 {% load static %}
 {% block content %}
+
   <div class="container">
 
     <!-- 학생증 -->
-    <div class="card id-card mx-auto my-3 border-dark">
+    <div class="card id-card mx-auto my-3 border border-dark border-3">
       <div class="card-header border-dark text-center text-bg-dark">
         JJ UNIVERSITY ID CARD
       </div>
@@ -33,7 +34,17 @@
             <dt class="col-3 text-center">Class : </dt>
             <dd class="col-9"> {{ user.profile.position }} 전공</dd>
             <dt class="col-3 text-center">Rank : </dt>
-            <dd class="col-9">신입생</dd>
+            {% if user.review_set.count|add:user.comment_set.count|add:user.freereview_set.count|add:user.freecomment_set.count < 10 %}
+              <dd class="col-9">1학년</dd>
+            {% elif user.review_set.count|add:user.comment_set.count|add:user.freereview_set.count|add:user.freecomment_set.count < 20 %}
+            <dd class="col-9">2학년</dd>
+            {% elif user.review_set.count|add:user.comment_set.count|add:user.freereview_set.count|add:user.freecomment_set.count < 30 %}
+            <dd class="col-9">3학년</dd>
+            {% elif user.review_set.count|add:user.comment_set.count|add:user.freereview_set.count|add:user.freecomment_set.count < 40 %}
+            <dd class="col-9">4학년</dd>
+            {% elif user.review_set.count|add:user.comment_set.count|add:user.freereview_set.count|add:user.freecomment_set.count >= 40 %}
+            <dd class="col-9">대학원생</dd>
+            {% endif %}
             <dt class="col-3 text-center">E-mail : </dt>
             <dd class="col-9">{{user.email}}</dd>
             <!-- 상태 메세지 -->
@@ -69,33 +80,94 @@
       </div>
     </div>
 
-    <hr>
-
-    <!-- 작성한 글 -->
-    <div>
-      <h4>작성한 글</h4>
-      <p>디자인 생각 중</p>
-      <p></p>
+    <ul class="nav nav-tabs mt-5" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">리뷰</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">자유게시판</button>
+      </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <!-- 아티클 -->
+      <div class="tab-pane fade show active mb-3" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+        <div class="row my-3">
+          <div class="col-12 col-md-6 d-flex flex-column">
+            <h4 class="text-center">좋아요 {{ user.like_review.count }}</h4>
+            {% for article in user.like_review.all %}
+            <div style="cursor: pointer;" onclick="location.href='{% url 'articles:detail' article.pk %}';" class="border-bottom p-1 d-flex align-items-center">
+              {% if article.image %}
+              <img class="free-img rounded border me-3" src="{{ article.image.url }}" alt="{{ article.image }}">
+              {% else %}
+              <img class="free-img rounded border me-3" src="https://dummyimage.com/200x200/000/fff.png" alt="">
+              {% endif %}
+              <div class="d-flex flex-column">
+                <p class="m-0 fw-bold">{{ article.title }}</p>
+                <p class="m-0 text-muted">{{ article.addr }}</p>
+                <p class="m-0 text-muted">{{ article.position }}</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="col-12 col-md-6 d-flex flex-column">
+            <h4 class="text-center">리뷰 {{ user.comment_set.count }}</h4>
+            {% for comment in user.comment_set.all %}
+            <div style="cursor: pointer;" onclick="location.href='{% url 'articles:detail' comment.review_id %}';" class="border-bottom p-1 d-flex align-items-center">
+              {% if comment.image %}
+              <img class="free-img rounded border me-3" src="{{ comment.image.url }}" alt="{{ comment.image }}">
+              {% else %}
+              <img class="free-img rounded border me-3" src="https://dummyimage.com/200x200/000/fff.png" alt="">
+              {% endif %}
+              <div class="d-flex flex-column">
+                <p class="m-0 fw-bold">{{ comment.content }}</p>
+                <p class="m-0 text-muted">{{ comment.review.title }}</p>
+                <p class="m-0 text-muted">{{ comment.updated_at|date:'Y-m-d' }}</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <!-- 자유게시판 -->
+      <div class="tab-pane fade mb-3" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+        <div class="row my-3">
+          <div class="col-12 col-md-6 d-flex flex-column">
+            <h4 class="text-center">게시글 {{ user.freereview_set.count }}</h4>
+            {% for article in user.freereview_set.all %}
+            <div style="cursor: pointer;" onclick="location.href='{% url 'free:detail' article.pk %}';" class="border-bottom p-1 d-flex align-items-center">
+              {% if article.image %}
+              <img class="free-img rounded border me-3" src="{{ article.image.url }}" alt="{{ article.image }}">
+              {% else %}
+              <img class="free-img rounded border me-3" src="https://dummyimage.com/200x200/000/fff.png" alt="">
+              {% endif %}
+              <div class="d-flex flex-column">
+                <p class="m-0 fw-bold">{{ article.title }}</p>
+                <p class="m-0 text-muted">{{ article.content }}</p>
+                <p class="m-0 text-muted">{{ article.updated_at|date:'Y-m-d' }}</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="col-12 col-md-6 d-flex flex-column">
+            <h4 class="text-center">댓글 {{ user.freecomment_set.count }}</h4>
+            {% for comment in user.freecomment_set.all %}
+            <div style="cursor: pointer;" onclick="location.href='{% url 'free:detail' comment.free_id %}';" class="border-bottom p-1 d-flex align-items-center">
+              {% if comment.free.image %}
+              <img class="free-img rounded border me-3" src="{{ comment.free.image.url }}" alt="{{ comment.free.image }}">
+              {% else %}
+              <img class="free-img rounded border me-3" src="https://dummyimage.com/200x200/000/fff.png" alt="">
+              {% endif %}
+              <div class="d-flex flex-column">
+                <p class="m-0 fw-bold">{{ comment.content }}</p>
+                <p class="m-0 text-muted">{{ comment.free.title }}</p>
+                <p class="m-0 text-muted">{{ comment.updated_at|date:'Y-m-d' }}</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
     </div>
-
-    <hr>
-
-    <!-- 작성한 댓글 -->
-    <div>
-      <h4>작성한 댓글</h4>
-      <p>디자인 추천</p>
-      <p></p>
-    </div>
-
-    <hr>
-
-    <!-- 좋아요 식당-->
-    <div>
-      <h4>좋아요한 식당</h4>
-      <p>흠</p>
-      <p></p>
-    </div>    
-
   </div>
   {% endblock %}
 

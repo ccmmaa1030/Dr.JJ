@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CommentForm, ReviewForm
-from .models import Comment, Review
+from .models import Freecomment, Freereview
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
@@ -10,7 +10,7 @@ from django.core.paginator import Paginator
 
 
 def index(request):
-    reviews = Review.objects.order_by("-pk")
+    reviews = Freereview.objects.order_by("-pk")
     page = request.GET.get("page", "1")
     paginator = Paginator(reviews, 5)
     page_obj = paginator.get_page(page)
@@ -34,20 +34,22 @@ def create(request):
     return render(request, "free/create.html", context)
 
 
+@login_required
 def detail(request, free_pk):
-    review = Review.objects.get(pk=free_pk)
+    review = Freereview.objects.get(pk=free_pk)
     comment_form = CommentForm()
     context = {
         "review": review,
         "comment_form": comment_form,
-        "comments": review.comment_set.all(),
+        "comments": review.freecomment_set.all(),
     }
 
     return render(request, "free/detail.html", context)
 
 
+@login_required
 def update(request, free_pk):
-    review = Review.objects.get(pk=free_pk)
+    review = Freereview.objects.get(pk=free_pk)
     if request.method == "POST":
         review_form = ReviewForm(request.POST, request.FILES, instance=review)
         if review_form.is_valid():
@@ -60,15 +62,16 @@ def update(request, free_pk):
     return render(request, "free/update.html", context)
 
 
+@login_required
 def delete(request, free_pk):
-    review = Review.objects.get(pk=free_pk)
+    review = Freereview.objects.get(pk=free_pk)
     review.delete()
     return redirect("free:index")
 
 
 @login_required
 def comment_create(request, pk):
-    review = Review.objects.get(pk=pk)
+    review = Freereview.objects.get(pk=pk)
     comment_form = CommentForm(request.POST)
     if comment_form.is_valid():
         comment = comment_form.save(commit=False)
@@ -80,14 +83,14 @@ def comment_create(request, pk):
 
 @login_required
 def comment_delete(request, comment_pk, review_pk):
-    comment = Comment.objects.get(pk=comment_pk)
+    comment = Freecomment.objects.get(pk=comment_pk)
     comment.delete()
     return redirect("free:detail", review_pk)
 
 
 @login_required
 def comment_update(request, free_pk, comment_pk):
-    comment = Comment.objects.get(pk=comment_pk)
+    comment = Freecomment.objects.get(pk=comment_pk)
 
     data = {"comment_content": comment.content}
 
@@ -96,7 +99,7 @@ def comment_update(request, free_pk, comment_pk):
 
 @login_required
 def comment_update_complete(request, free_pk, comment_pk):
-    comment = Comment.objects.get(pk=comment_pk)
+    comment = Freecomment.objects.get(pk=comment_pk)
     comment_form = CommentForm(request.POST, instance=comment)
 
     if comment_form.is_valid():
@@ -117,7 +120,7 @@ def comment_update_complete(request, free_pk, comment_pk):
 
 @login_required
 def like(request, free_pk):
-    review = get_object_or_404(Review, pk=free_pk)
+    review = get_object_or_404(Freereview, pk=free_pk)
     # 만약에 로그인한 유저가 이 글을 좋아요를 눌렀다면,
     # if review.like_users.filter(id=request.user.id).exists():
     if request.user in review.like_users.all():
@@ -137,8 +140,9 @@ def like(request, free_pk):
     return JsonResponse(data)
 
 
+@login_required
 def search(request):
-    all_data = Review.objects.order_by("-pk")
+    all_data = Freereview.objects.order_by("-pk")
     search = request.GET.get("search", "")
     page = request.GET.get("page", "1")  # 페이지
     paginator = Paginator(all_data, 5)
@@ -152,11 +156,13 @@ def search(request):
         paginator = Paginator(search_list, 5)  # 페이지당 3개씩 보여주기
         page_obj = paginator.get_page(page)
         context = {
+            "search": search,
             "search_list": search_list,
             "question_list": page_obj,
         }
     else:
         context = {
+            "search": search,
             "search_list": all_data,
             "question_list": page_obj,
         }

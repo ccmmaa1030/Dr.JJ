@@ -11,29 +11,48 @@
   {% comment %} 파비콘 {% endcomment %}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
-  <title>쩝쩝박사</title>
+  <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}"/>
+  <title>먹보대학</title>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg bg-light">
     <div class="container-fluid">
-      <a class="navbar-brand" href="{% url 'articles:index' %}">쩝쩝박사</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      
-        <ul class="navbar-nav">
+      <div class="d-flex">
+        <a class="navbar-brand" href="{% url 'articles:index' %}">
+        <img style=width=45; height=45px; src="{%static 'images/logo.png' %}"></a>
+          <ul class="navbar-nav align-items-center">
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="{% url 'free:index' %}">자유게시판</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{% url 'articles:prof' %}">교수 소개</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{% url 'accounts:index' %}">재학생</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{% url 'articles:thx' %}">재능기부</a>
+          </li>
         </ul>
-   
+      </div>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
       <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
-       
         <form class="d-flex m-2" role="search" action="{% url 'free:search' %}">
           <input class="form-control me-2" type="search"  method="GET" placeholder="EAT THIS!" name="search" aria-label="search">
-          <button class="btn btn-outline-dark"  type="submit">Go</button>
-      </form>
-      {% if request.user.is_authenticated %}
+          <button class="btn btn-link p-0 m-0"  type="submit">
+            <script src="https://cdn.lordicon.com/qjzruarw.js"></script>
+            <lord-icon
+                src="https://cdn.lordicon.com/msoeawqm.json"
+                trigger="hover"
+                colors="primary:#121331,secondary:#e83a30"
+                stroke="70"
+                style="width:38px;height:38px">
+            </lord-icon>
+          </button>
+        </form>
+        {% if request.user.is_authenticated %}
         <ul class="navbar-nav mb-2 mb-lg-0">
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="{% url 'accounts:detail' request.user.pk %}">Hi, {{ request.user.username }}</a>
@@ -42,14 +61,14 @@
             <a class="nav-link active" aria-current="page" href="{% url 'accounts:logout' %}">logout</a>
           </li>
         </ul>
-          {% else %}
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-                <a class="nav-link" aria-current="page" href="{% url 'accounts:login' %}">login</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'accounts:signup' %}" >signup</a>
-            </li>
+        {% else %}
+        <ul class="navbar-nav mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="{% url 'accounts:login' %}">login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'accounts:signup' %}" >signup</a>
+          </li>
         </ul>
         {% endif %}
       </div>
